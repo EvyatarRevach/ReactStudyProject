@@ -18,8 +18,10 @@ function TripsPage() {
     const [trips, setTrips] = useState<Trip[]>([]);
     const { setCurrentPage, idRef } = useContext(MyGlobalPageContext);
     const authToken = localStorage.getItem('authToken');
+    const [isLoading, setIsLoading] = useState(false);
 
     async function fetchTrips() {
+        setIsLoading(true);
         try {
             const response = await fetch('http://localhost:3000/api/trips');
             if (!response.ok) {
@@ -30,6 +32,10 @@ function TripsPage() {
             console.log(data)
         } catch (error) {
             console.error('Error fetching trips:', error);
+        } finally {
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
         }
     }
 
@@ -69,27 +75,37 @@ function TripsPage() {
     }
 
     return (
-        <div className='trips-container'>
-            <button onClick={() => setCurrentPage('AddTrip')}>Add Trip</button>
-            <button onClick={BackToTheHomeScreen}>Back to the home screen</button>
-            <h1>List of trips</h1>
-            {trips.map((trip) => (
-                <div key={trip.id}>
-                    <button onClick={() => handleClick(trip.id)}>
-                        <h2>{trip.name}</h2>
-                        <p>Target: {trip.destination}</p>
-                        <p>Start Date: {trip.startDate}</p>
-                        <p>End date: {trip.endDate}</p>
-                        <img src={trip.image} alt={trip.name} />
-                    </button>
-                    <button onClick={() => handleDelete(trip.id)}>Delete Trip</button>
-                    <button onClick={() => handleUpdate(trip.id)}>Update Trip</button>
-
+        <div>
+            {isLoading ? (
+                <div>
+                    <h1>Loading...</h1>
                 </div>
-    ))
-}
-        </div >
-    );
+            ) : (
+                <div className='trips-container'>
+                    <button onClick={() => setCurrentPage('AddTrip')}>Add Trip</button>
+                    <button onClick={BackToTheHomeScreen}>Back to the home screen</button>
+                    <h1>List of trips</h1>
+                    {trips.map((trip) => (
+                        <div key={trip.id}>
+                            <button onClick={() => handleClick(trip.id)}>
+                                <h2>{trip.name}</h2>
+                                <p>Target: {trip.destination}</p>
+                                <p>Start Date: {trip.startDate}</p>
+                                <p>End date: {trip.endDate}</p>
+                                <img src={trip.image} alt={trip.name} />
+                            </button>
+                            <button onClick={() => handleDelete(trip.id)}>Delete Trip</button>
+                            <button onClick={() => handleUpdate(trip.id)}>Update Trip</button>
+
+                        </div>
+                    ))
+                    }
+                </div >
+            )
+
+            }
+        </div>
+    )
 }
 
 export default TripsPage;

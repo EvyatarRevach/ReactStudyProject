@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { MyGlobalPageContext } from './PageContext';
 
 type Trip = {
   id: string;
@@ -14,12 +15,14 @@ type Trip = {
 };
 
 function AddTripForm() {
+    const { setCurrentPage } = useContext(MyGlobalPageContext);
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<Trip>(); // הגדר את סוג הנתונים ל- useForm
+  } = useForm<Trip>(); 
 
   const onSubmit = async (data: Trip) => {
     try {
@@ -41,6 +44,9 @@ function AddTripForm() {
       }
 
       alert('Trip added successfully');
+      setTimeout(() => {
+        setCurrentPage('allTours');
+    },1000 );
     } catch (error) {
       console.error('Error adding trip:', error);
     }

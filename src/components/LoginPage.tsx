@@ -1,5 +1,5 @@
-import { useForm, SubmitHandler } from 'react-hook-form';
 import React, { useState, useContext } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { MyGlobalPageContext } from './PageContext';
 
 interface LoginResponse {
@@ -20,12 +20,13 @@ type UserRegistration = {
 };
 
 function LoginPage() {
+    const { setCurrentPage } = useContext(MyGlobalPageContext);
     const { register, handleSubmit, formState: { errors } } = useForm<UserRegistration>();
     const [message, setMessage] = useState<string>('');
-    const { setCurrentPage } = useContext(MyGlobalPageContext);
+    const [isLoading, setIsLoading] = useState(false); 
 
     const loginUser = async (data: UserRegistration) => {
-        setCurrentPage('Loading')
+        setIsLoading(true); 
         try {
             const response = await fetch('http://localhost:3000/api/auth/login', {
                 method: 'POST',
@@ -39,15 +40,15 @@ function LoginPage() {
 
             if (response.ok) {
                 if (result.responseObj.token) {
-                
-                    setTimeout(() => {
-                        setCurrentPage('login'); 
-                      }, 2000);
                     localStorage.setItem('authToken', result.responseObj.token);
                     setMessage('Login successful');
+                    setTimeout(() => {
+                        setCurrentPage('home');
+                    },2000 );
                 } else {
                     console.error('Login failed');
                     setMessage('Login failed');
+                    
                 }
             } else {
                 console.error('Server error');
@@ -56,6 +57,11 @@ function LoginPage() {
         } catch (error) {
             console.error('Error:', error);
             setMessage('Login failed');
+        } finally {
+            setTimeout(() => {
+                setIsLoading(false);
+            },1000 );
+             
         }
     };
 
@@ -64,21 +70,29 @@ function LoginPage() {
     };
 
     return (
-        <div >
-            <button onClick={() => setCurrentPage('home')}>Back to the home screen</button>
-            <h1>Login Page</h1>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <label>Email</label>
-                <input type="email" {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
-                {errors.email && <p>Email is required and must be valid</p>}
+        <div>
+            {isLoading ? ( 
+                <div>
+                    <h1>Loading...</h1>
+                </div>
+            ) : (
+                <div>
+                    <button onClick={() => setCurrentPage('home')}>Back to the home screen</button>
+                    <h1>Login Page</h1>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <label>Email</label>
+                        <input type="email" {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
+                        {errors.email && <p>Email is required and must be valid</p>}
 
-                <label>Password</label>
-                <input type="password" {...register("password", { required: true })} />
-                {errors.password && <p>Password is required</p>}
+                        <label>Password</label>
+                        <input type="password" {...register("password", { required: true })} />
+                        {errors.password && <p>Password is required</p>}
 
-                <button type="submit">Submit</button>
-            </form>
-            <p>{message}</p>
+                        <button type="submit">Submit</button>
+                    </form>
+                    <p>{message}</p>
+                </div>
+            )}
         </div>
     );
 }

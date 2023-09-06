@@ -24,7 +24,7 @@ function HomePage() {
     };
     const handleLogoutClick = () => {
         localStorage.removeItem('authToken');
-        setCurrentPage('home');
+        // setCurrentPage('home');
         alert('Logout successful');
       };
     return (
